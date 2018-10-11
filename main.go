@@ -82,7 +82,7 @@ func (m *Manager) accept() (net.Conn, error) {
 
 func (m *Manager) handle(conn net.Conn) {
 	defer conn.Close()
-	tcpDump(conn)
+	connDump(conn)
 }
 
 func (m *Manager) canQuit() bool {
@@ -96,4 +96,29 @@ func (m *Manager) doQuit() {
 	// m.quitLocker.Lock()
 	m.quit = true
 	// m.quitLocker.Unlock()
+}
+
+// conn only contains data
+func connDump(conn net.Conn) {
+	fmt.Println("Local Address:")
+	loc := conn.LocalAddr()
+	fmt.Println("\tNetwork:", loc.Network())
+	fmt.Println("\tString:", loc.String())
+
+	fmt.Println("Remote Address:")
+	remote := conn.RemoteAddr()
+	fmt.Println("\tNetwork:", remote.Network())
+	fmt.Println("\tString:", remote.String())
+
+	fmt.Println("Start to read connection data:")
+	for {
+		var buf = make([]byte, 256)
+		n, err := conn.Read(buf)
+		if err != nil {
+			fmt.Println("[Error] Failed to read:", err)
+			return
+		}
+		fmt.Printf("\tRead %d Data []byte: %v\n", n, buf)
+		fmt.Printf("\tRead %d Data string: %v\n", n, string(buf))
+	}
 }
